@@ -3422,9 +3422,9 @@ expo-status-bar@~1.12.1:
   resolved "https://registry.npmjs.org/expo-status-bar/-/expo-status-bar-1.12.1.tgz"
   integrity sha512-/t3xdbS8KB0prj5KG5w7z+wZPFlPtkgs95BsmrP/E7Q0xHXTcDcQ6Cu2FkFuRM+PKTb17cJDnLkawyS5vDLxMA==
 
-expo@~51.0.9:
+expo@^51.0.0:
   version "51.0.9"
-  resolved "https://registry.npmjs.org/expo/-/expo-51.0.9.tgz"
+  resolved "https://registry.yarnpkg.com/expo/-/expo-51.0.9.tgz#a47de1b3d3afe1bf51f37bf69e487d0317686722"
   integrity sha512-USckGusi4389X/mFy8X8tEA59vgsc5joOILQrTsDPdDJawkUidDAVqY4NIjJxOY7zEq1SfPv/LglJ4cOdtvfsg==
   dependencies:
     "@babel/runtime" "^7.20.0"
