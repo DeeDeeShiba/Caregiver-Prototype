@@ -19,9 +19,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "config":{
       "googleMaps": {
         "apiKey": "AIzaSyBSxFbm2MTSWjPZW7qSIcJYsntXB0JH0AU"
-      },
+      }
+    },
       "package": "com.sheridanresearcher.CaregiverReact"
     },
     "web": {

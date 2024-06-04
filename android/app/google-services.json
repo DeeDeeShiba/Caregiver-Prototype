@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "1047801092723",
+    "firebase_url": "https://caa-pcc-data-ingestion-default-rtdb.firebaseio.com",
+    "project_id": "caa-pcc-data-ingestion",
+    "storage_bucket": "caa-pcc-data-ingestion.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1047801092723:android:4ee95b6d03d3dc88e46806",
+        "android_client_info": {
+          "package_name": "com.example.wearos_ingestion"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhf0lUUbHUtMc3jvxb6ko0GtxcOR4e91M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1047801092723:android:e3f842940029d4f3e46806",
+        "android_client_info": {
+          "package_name": "com.sheridanresearcher.CaregiverReact"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhf0lUUbHUtMc3jvxb6ko0GtxcOR4e91M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
