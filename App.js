@@ -64,14 +64,33 @@
 
 import React from 'react';
 import MapView from 'react-native-maps';
+import {Marker} from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <MapView style={styles.map} />
-      {/* <Marker coordinate={{latitude: 43.468600, longitude: -79.700430}}/> */}
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: 43.468601,
+          longitude: -79.700432,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
+        >
+          <Marker
+          coordinate={{
+            latitude: 43.468601,
+            longitude: -79.700432,
+          }}
+          title="My Marker"
+          description="This is a description of the marker"
+        />
+        </MapView>
+      
     </View>
+
   );
 }
 
