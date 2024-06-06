@@ -62,35 +62,97 @@
 //"AIzaSyBSxFbm2MTSWjPZW7qSIcJYsntXB0JH0AU"
 
 
-import React from 'react';
-import MapView from 'react-native-maps';
-import {Marker} from 'react-native-maps';
+// import React, { useEffect, useState } from 'react';
+// import MapView, {Marker} from 'react-native-maps';
+// import { StyleSheet, View } from 'react-native';
+// import { db } from 'firebase/app';
+
+// export default function App() {
+//   return (
+//     <View style={styles.container}>
+//       <MapView
+//         style={styles.map}
+//         initialRegion={{
+//           latitude: 43.468601,
+//           longitude: -79.700432,
+//           latitudeDelta: 0.0922,
+//           longitudeDelta: 0.0421,
+//         }}
+//         >
+//           <Marker
+//           coordinate={{
+//             latitude: 43.468601,
+//             longitude: -79.700432,
+//           }}
+//           title="My Marker"
+//           description="This is a description of the marker"
+//         />
+//         </MapView>
+      
+//     </View>
+
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//   },
+//   map: {
+//     width: '100%',
+//     height: '100%',
+//   },
+// });
+
+import React, { useEffect, useState } from 'react';
+import MapView, {Marker} from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
+import { db } from './firebase';
 
 export default function App() {
+  const [location, setLocation] = useState({ latitude: 43.468601, longitude: -79.700432 });
+
+  useEffect(() => {
+    const locationRef = db.ref('location'); // Adjust 'location' to your actual database reference
+    const onLocationChange = (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setLocation({
+          latitude: data.latitude,
+          longitude: data.longitude,
+        });
+      }
+    };
+
+    locationRef.on('value', onLocationChange);
+
+    // Cleanup subscription on unmount
+    return () => {
+      locationRef.off('value', onLocationChange);
+    };
+  }, []);
+
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: 43.468601,
-          longitude: -79.700432,
+          latitude: location.latitude,
+          longitude: location.longitude,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
-        >
-          <Marker
+      >
+        <Marker
           coordinate={{
-            latitude: 43.468601,
-            longitude: -79.700432,
+            latitude: location.latitude,
+            longitude: location.longitude,
           }}
           title="My Marker"
           description="This is a description of the marker"
         />
-        </MapView>
-      
+      </MapView>
     </View>
-
   );
 }
 
