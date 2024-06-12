@@ -1,6 +1,6 @@
 // firebase.js
-import firebase from 'firebase/app';
-import 'firebase/database';
+import { initializeApp } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAhf0lUUbHUtMc3jvxb6ko0GtxcOR4e91M",
@@ -11,8 +11,8 @@ const firebaseConfig = {
   appId: "1:1047801092723:android:e3f842940029d4f3e46806"
 };
 
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-export const db = firebase.database();
+// Get a reference to the database service
+export const db = getDatabase(app);

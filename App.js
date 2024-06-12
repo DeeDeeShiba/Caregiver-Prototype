@@ -105,26 +105,30 @@
 // });
 
 import React, { useEffect, useState } from 'react';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
 import { db } from './firebase';
+import { ref, onValue } from 'firebase/database';
 
 export default function App() {
-  const [location, setLocation] = useState({ latitude: 43.468601, longitude: -79.700432 });
+  const [locations, setLocations] = useState([]);
 
   useEffect(() => {
-    const locationRef = db.ref('location'); // Adjust 'location' to your actual database reference
+    const locationRef = ref(db, 'locations'); // Adjust 'locations' to your actual database reference
     const onLocationChange = (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        setLocation({
-          latitude: data.latitude,
-          longitude: data.longitude,
-        });
+        const locationList = Object.keys(data).map(key => ({
+          key,
+          latitude: data[key].latitude,
+          longitude: data[key].longitude,
+          timestamp: data[key].timestamp,
+        }));
+        setLocations(locationList);
       }
     };
 
-    locationRef.on('value', onLocationChange);
+    onValue(locationRef, onLocationChange);
 
     // Cleanup subscription on unmount
     return () => {
@@ -137,20 +141,23 @@ export default function App() {
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: location.latitude,
-          longitude: location.longitude,
+          latitude: 43.468601,
+          longitude: -79.700432,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
       >
-        <Marker
-          coordinate={{
-            latitude: location.latitude,
-            longitude: location.longitude,
-          }}
-          title="My Marker"
-          description="This is a description of the marker"
-        />
+        {locations.map(location => (
+          <Marker
+            key={location.key}
+            coordinate={{
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }}
+            title={`Location at ${new Date(location.timestamp).toLocaleString()}`}
+            description={`Lat: ${location.latitude}, Lng: ${location.longitude}`}
+          />
+        ))}
       </MapView>
     </View>
   );
