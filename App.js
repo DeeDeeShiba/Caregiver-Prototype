@@ -1,12 +1,13 @@
 //App.js
 import React, { useEffect, useState } from 'react';
 import MapView, { Marker, Heatmap } from 'react-native-maps';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Image } from 'react-native';
 import { db } from './firebase';
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue, off } from 'firebase/database';
 
 export default function App() {
   const [locations, setLocations] = useState([]);
+  const [currentLocation, setCurrentLocation] = useState(null);
 
   useEffect(() => {
     const locationRef = ref(db, 'locations'); // Adjust 'locations' to your actual database reference
@@ -20,6 +21,8 @@ export default function App() {
           timestamp: data[key].timestamp,
         }));
         setLocations(locationList);
+        // Update current location for the custom marker to the latest location
+        setCurrentLocation(locationList[locationList.length - 1]);
       }
     };
 
@@ -27,9 +30,25 @@ export default function App() {
 
     // Cleanup subscription on unmount
     return () => {
-      locationRef.off('value', onLocationChange);
+      off(locationRef, 'value', onLocationChange);
     };
   }, []);
+
+  // Debug information to check the heatmap points
+  useEffect(() => {
+    console.log('Heatmap Points:', locations.map(location => ({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      weight: 1, // You can adjust the weight as needed
+    })));
+  }, [locations]);
+
+
+  const heatmapPoints = locations.map(location => ({
+    latitude: location.latitude,
+    longitude: location.longitude,
+    weight: 1, // You can adjust the weight as needed
+  }));
 
   return (
     <View style={styles.container}>
@@ -42,30 +61,32 @@ export default function App() {
           longitudeDelta: 0.0421,
         }}
       >
-        {locations.map(location => (
+        {currentLocation && (
           <Marker
-            key={location.key}
             coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
             }}
-            title={`Location at ${new Date(location.timestamp).toLocaleString()}`}
-            description={`Lat: ${location.latitude}, Lng: ${location.longitude}`}
+            title={`Location at ${new Date(currentLocation.timestamp).toLocaleString()}`}
+            description={`Lat: ${currentLocation.latitude}, Lng: ${currentLocation.longitude}`}
+          >
+            <Image
+              source={require('./assets/grandma_emoji.png')}
+              style={{ width: 50, height: 50 }}
+            />
+          </Marker>
+        )}
+        {/* Conditional rendering of Heatmap */}
+        {heatmapPoints.length > 0 && (
+          <Heatmap
+            points={heatmapPoints}
+            opacity={0.6}
+            radius={20}
+            maxIntensity={100}
+            gradientSmoothing={10}
+            heatmapMode="POINTS_DENSITY"
           />
-        ))}
-        <Heatmap
-          points={locations.map(location => ({
-            latitude: location.latitude,
-            longitude: location.longitude,
-            weight: 1, // You can adjust the weight as needed
-          }))}
-          opacity={0.6}
-          radius={20}
-          maxIntensity={100}
-          gradientSmoothing={10}
-          heatmapMode="POINTS_DENSITY"
-        />
-
+        )}
       </MapView>
     </View>
   );
