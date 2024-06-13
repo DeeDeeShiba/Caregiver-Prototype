@@ -1,6 +1,6 @@
 //App.js
 import React, { useEffect, useState } from 'react';
-import MapView, { Marker, Heatmap, Circle } from 'react-native-maps';
+import MapView, { Marker, Heatmap, Circle, Polygon } from 'react-native-maps';
 import { StyleSheet, View, Image } from 'react-native';
 import { db } from './firebase';
 import { ref, onValue, off } from 'firebase/database';
@@ -9,7 +9,7 @@ import axios from 'axios';
 export default function App() {
   const [locations, setLocations] = useState([]);
   const [currentLocation, setCurrentLocation] = useState(null);
-  const [buildingCenter, setBuildingCenter] = useState(null);
+  const [buildingCoordinates, setBuildingCoordinates] = useState([]);
 
   useEffect(() => {
     const locationRef = ref(db, 'locations'); // Adjust 'locations' to your actual database reference
@@ -27,7 +27,7 @@ export default function App() {
         const latestLocation = locationList[locationList.length - 1];
         setCurrentLocation(latestLocation);
         if (latestLocation) {
-          getBuildingCenter(latestLocation.latitude, latestLocation.longitude);
+          getBuildingCoordinates(latestLocation.latitude, latestLocation.longitude);
         }
       }
     };
@@ -40,21 +40,37 @@ export default function App() {
     };
   }, []);
 
-  const getBuildingCenter = async (latitude, longitude) => {
+  const getBuildingCoordinates = async (latitude, longitude) => {
     try {
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyBSxFbm2MTSWjPZW7qSIcJYsntXB0JH0AU`
       );
       const results = response.data.results;
       if (results.length > 0) {
-        const location = results[0].geometry.location;
-        setBuildingCenter({
-          latitude: location.lat,
-          longitude: location.lng,
-        });
+        console.log('Geocoding Result Properties:');
+        for (const [key, value] of Object.entries(results[0])) {
+          console.log(`${key}:\n${JSON.stringify(value, null, 2)}\n`);
+        }
+        
+        const placeId = results[0].place_id;
+        const placeDetails = await axios.get(
+          `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=AIzaSyBSxFbm2MTSWjPZW7qSIcJYsntXB0JH0AU`
+        );
+        const placeResult = placeDetails.data.result;
+        if (placeResult.geometry && placeResult.geometry.viewport) {
+          const viewport = placeResult.geometry.viewport;
+          const expandFactor = 0.001; // Factor to expand the area
+          const coordinates = [
+            { latitude: viewport.northeast.lat + expandFactor, longitude: viewport.northeast.lng + expandFactor },
+            { latitude: viewport.southwest.lat - expandFactor, longitude: viewport.northeast.lng + expandFactor },
+            { latitude: viewport.southwest.lat - expandFactor, longitude: viewport.southwest.lng - expandFactor },
+            { latitude: viewport.northeast.lat + expandFactor, longitude: viewport.southwest.lng - expandFactor },
+          ];
+          setBuildingCoordinates(coordinates);
+        }
       }
     } catch (error) {
-      console.error('Error fetching building center:', error);
+      console.error('Error fetching building coordinates:', error);
     }
   };
 
@@ -111,11 +127,10 @@ export default function App() {
           />
         )}
 
-        {buildingCenter && (
-          <Circle
-            center={buildingCenter}
-            radius={100} // Define the radius as per your requirement
-            strokeWidth={1}
+        {buildingCoordinates.length > 0 && (
+          <Polygon
+            coordinates={buildingCoordinates}
+            strokeWidth={2}
             strokeColor={'#1a66ff'}
             fillColor={'rgba(230,238,255,0.5)'}
           />
