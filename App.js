@@ -1,13 +1,15 @@
 //App.js
 import React, { useEffect, useState } from 'react';
-import MapView, { Marker, Heatmap } from 'react-native-maps';
+import MapView, { Marker, Heatmap, Circle } from 'react-native-maps';
 import { StyleSheet, View, Image } from 'react-native';
 import { db } from './firebase';
 import { ref, onValue, off } from 'firebase/database';
+import axios from 'axios';
 
 export default function App() {
   const [locations, setLocations] = useState([]);
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [buildingCenter, setBuildingCenter] = useState(null);
 
   useEffect(() => {
     const locationRef = ref(db, 'locations'); // Adjust 'locations' to your actual database reference
@@ -22,7 +24,11 @@ export default function App() {
         }));
         setLocations(locationList);
         // Update current location for the custom marker to the latest location
-        setCurrentLocation(locationList[locationList.length - 1]);
+        const latestLocation = locationList[locationList.length - 1];
+        setCurrentLocation(latestLocation);
+        if (latestLocation) {
+          getBuildingCenter(latestLocation.latitude, latestLocation.longitude);
+        }
       }
     };
 
@@ -34,6 +40,24 @@ export default function App() {
     };
   }, []);
 
+  const getBuildingCenter = async (latitude, longitude) => {
+    try {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyBSxFbm2MTSWjPZW7qSIcJYsntXB0JH0AU`
+      );
+      const results = response.data.results;
+      if (results.length > 0) {
+        const location = results[0].geometry.location;
+        setBuildingCenter({
+          latitude: location.lat,
+          longitude: location.lng,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching building center:', error);
+    }
+  };
+
   // Debug information to check the heatmap points
   useEffect(() => {
     console.log('Heatmap Points:', locations.map(location => ({
@@ -42,7 +66,6 @@ export default function App() {
       weight: 1, // You can adjust the weight as needed
     })));
   }, [locations]);
-
 
   const heatmapPoints = locations.map(location => ({
     latitude: location.latitude,
@@ -76,7 +99,7 @@ export default function App() {
             />
           </Marker>
         )}
-        {/* Conditional rendering of Heatmap */}
+
         {heatmapPoints.length > 0 && (
           <Heatmap
             points={heatmapPoints}
@@ -85,6 +108,16 @@ export default function App() {
             maxIntensity={100}
             gradientSmoothing={10}
             heatmapMode="POINTS_DENSITY"
+          />
+        )}
+
+        {buildingCenter && (
+          <Circle
+            center={buildingCenter}
+            radius={100} // Define the radius as per your requirement
+            strokeWidth={1}
+            strokeColor={'#1a66ff'}
+            fillColor={'rgba(230,238,255,0.5)'}
           />
         )}
       </MapView>
